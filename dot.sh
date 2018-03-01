@@ -50,5 +50,26 @@ dot-rm()
 }
 
 
-# dot-versioned: Which of the configs are in version control?
+# dot-versioned: Which of the configs are locally in version control?
+dot-versioned()
+{
+    local XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
+    local bd=${XDG_CONFIG_HOME}/bash.d
+    gits=$(find $bd -name ".git" -type d)
+    for gt in ${gits}; do
+        basename $(readlink -f ${gt}/..)
+    done
+}
+
 # dot-unversioned: Which of the configs are not in version control?
+dot-unversioned()
+{
+    local XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
+    local bd=${XDG_CONFIG_HOME}/bash.d
+    cfgs=$(find $bd -maxdepth 1 -type f)
+    for cfg in ${cfgs}; do
+        basename ${cfg}
+    done
+}
+
+

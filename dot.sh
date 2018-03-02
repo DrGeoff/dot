@@ -1,6 +1,7 @@
 # Simple functions to make life easier to use the dot-* github repositories
 
-dot-foreach()
+# dot-* projects can have more than one config file.  This iterates over every config file.
+dot-foreach-config()
 {
     local XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
     local dotfiles=$(find $XDG_CONFIG_HOME/bash.d -type f -not -wholename '*.git*')
@@ -9,16 +10,26 @@ dot-foreach()
     done
 }
 
+# A dot-* project may or may not be version controlled.  This iterates over every project name.
+dot-foreach-project()
+{
+    local versioned_projects=$(dot-versioned | tr '\n' ' ')
+    local unversioned_projects=$(dot-unversioned | tr '\n' ' ') 
+    for project in ${versioned_projects} ${unversioned_projects}; do
+        eval "$1" ${project}
+    done
+}
+
 # What dot-* are installed locally?
 dot-installed()
 {
-    dot-foreach echo
+    dot-foreach-project echo
 }
 
 # Create the equivalent .profile
 dot-cat()
 {
-    dot-foreach cat
+    dot-foreach-config cat
 }
 
 # What dot-* are available on github?

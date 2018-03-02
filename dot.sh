@@ -41,6 +41,11 @@ dot-available()
 # dot-install/dot-clone:  Do a git clone of a github dot-* repo
 dot-install()
 {
+    if [[ -z "$1" ]]; then
+        echo Must specifiy a repository to ${FUNCNAME[0]}
+        return
+    fi
+
     local repo="$1"
     local XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
     pushd $XDG_CONFIG_HOME/bash.d >/dev/null

@@ -1,0 +1,67 @@
+# Returns " |uncommited modifications:N" if the current git branch is dirty.
+locally_changed_files()
+{
+	num_files_changed=$(git diff --shortstat 2> /dev/null | tail -n1|cut -d' ' -f2)
+	if [[ $num_files_changed != "" ]]; then 
+		echo -e ${red}uncommited modifications:$num_files_changed
+	fi 
+}
+
+# Returns "|stashed:N" where N is the number of stashed states (if any).
+git_stash()
+{
+	local stash=`expr $(git stash list 2>/dev/null| wc -l)`
+	if [ "$stash" != "0" ]; then
+		echo -e ${green}stashed:$stash
+	fi
+}
+
+# Return how many commits the local repo is ahead of the origin
+unpushed_commits()
+{
+	local current_branch=$(git symbolic-ref HEAD 2>/dev/null | cut -d'/' -f3)
+	local count_ahead=$(git log origin/$current_branch..HEAD --format=oneline 2>/dev/null|wc -l)
+	if (( $count_ahead > 0 )); then
+		echo -e ${red}unpushed commits:$count_ahead
+	fi
+}
+
+# Return a count of the untracked files and directories
+untracked()
+{
+	local count=$(git status -s --untracked=all | grep '?' |wc -l)
+	if (( $count > 0 )); then
+		echo -e ${red}untracked files:$count
+	fi
+}
+
+# Return a count of the staged but not committed files 
+staged()
+{
+	local count=$(git diff --shortstat --staged 2> /dev/null | tail -n1|cut -d' ' -f2)
+	if [[ -n $count ]] && (( $count > 0 )); then
+		echo -e ${red}staged files:$count
+	fi
+}
+
+
+# Get the current git branch name (if available)
+branchname()
+{
+    local ref=$(git symbolic-ref HEAD 2>/dev/null | cut -d'/' -f3)
+    if [ "$ref" != "" ]; then
+        echo -e "$light_blue$ref "
+    fi
+}
+
+# Combine it all together
+repostatus() 
+{
+    project=$(basename $(readlink -f .))
+    if [[ $(git status 2>/dev/null) ]]; then
+        echo -e "$blue${project}: $(branchname) $(locally_changed_files) $(untracked) $(git_stash) $(staged) $(unpushed_commits)"
+    fi
+}
+
+
+

@@ -88,4 +88,20 @@ dot-unversioned()
     done
 }
 
+# dot-status: What is the git status of the versioned configs 
+dot-status()
+{
+    local versioned_projects=$(dot-versioned | tr '\n' ' ')
+    local XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
+    for project in ${versioned_projects}; do
+        local local_repo=${XDG_CONFIG_HOME}/bash.d/${project}
+        pushd ${local_repo} >/dev/null
+        repostatus
+        popd >/dev/null
+    done
 
+    local unversioned_projects=$(dot-unversioned | tr '\n' ' ') 
+    for project in ${unversioned_projects}; do
+        echo -e "$blue$project: $red unversioned"    
+    done
+}

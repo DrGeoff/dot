@@ -26,10 +26,20 @@ dot-installed()
     dot-foreach-project echo
 }
 
+# Echo the config name before cat
+echo-cat()
+{
+    echo "#"
+    echo "# $1"
+    echo "#"
+    eval cat "$1"
+    echo
+}
+
 # Create the equivalent .profile
 dot-cat()
 {
-    dot-foreach-config cat
+    dot-foreach-config echo-cat
 }
 
 # What dot-* are available on github?

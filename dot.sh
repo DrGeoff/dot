@@ -4,7 +4,7 @@
 dot-foreach-config()
 {
     local XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
-    local dotfiles=$(find $XDG_CONFIG_HOME/bash.d -type f \( ! -iwholename '*.git*' ! -name LICENSE \) )
+    local dotfiles=$(find $XDG_CONFIG_HOME/bash.d -type f \( ! -iwholename '*.git*' ! -name 'LICEN*' ! -name README  ! -name '*spec' \) )
     for dotfile in $dotfiles; do
         eval "$1" $dotfile
     done
@@ -42,24 +42,53 @@ dot-cat()
     dot-foreach-config echo-cat
 }
 
+# Figure out the github user name
+dot-github-user()
+{
+    # Assume $1 is the github user name, but if no $1 is passed in then try to find their name in .gitconfig
+    local gitconfig_nameline=$(grep name ${HOME}/.gitconfig |head -1)
+    local gitconfig_name=${gitconfig_nameline#*= }
+    echo ${1:-$gitconfig_name}
+}
+
 # What dot-* are available on github?
 dot-available()
 {
-    curl -s https://api.github.com/users/DrGeoff/repos |jq '.[].name' |xargs |tr ' ' '\n' |grep ^dot
+    local github_user=$(dot-github-user "$1")
+    local available=$(curl -s https://api.github.com/users/${github_user}/repos |jq '.[].name' |xargs |tr ' ' '\n' )
+
+    # If there are repositories named dot-* then assume that they are the only ones we want to see
+    if [[ $(grep -c ^dot <<< ${available}) -gt 0 ]]; then
+        grep ^dot <<< $available
+    else
+        cat <<< ${available}
+    fi
 }
 
 # dot-install/dot-clone:  Do a git clone of a github dot-* repo
 dot-install()
 {
+    # $1 must be either a full clonable repository like
+    # https://github.com/wolfwoolford/dish.git
+    # or a repository under their github username
+
     if [[ -z "$1" ]]; then
         echo Must specifiy a repository to ${FUNCNAME[0]}
         return
     fi
 
+    # If the reponame contains github, assume that it is a full github name
+    # otherwise tack on all the other bits and bobs.
     local repo="$1"
+    if [[ ! $repo =~ .*github.* ]]; then
+        local github_user=$(dot-github-user)
+        repo=git@github.com:${github_user}/${repo}
+    fi
+
+    # 
     local XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
     pushd $XDG_CONFIG_HOME/bash.d >/dev/null
-    git clone git@github.com:DrGeoff/${repo}
+    git clone ${repo} 
     popd >/dev/null
 }
 alias dot-clone=dot-install

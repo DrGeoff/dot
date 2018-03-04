@@ -20,6 +20,15 @@ dot-foreach-project()
     done
 }
 
+# Iterate over only the version controlled projects
+dot-foreach-versioned-project()
+{
+    local versioned_projects=$(dot-versioned | tr '\n' ' ')
+    for project in ${versioned_projects}; do
+        eval "$1" ${project}
+    done
+}
+
 # What dot-* are installed locally?
 dot-installed()
 {
@@ -34,6 +43,30 @@ echo-cat()
     echo "#"
     eval cat "$1"
     echo
+}
+
+# What is the local pathname for the repositories cloned from github
+localname()
+{
+    local repo="$1"
+    local XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
+    echo ${XDG_CONFIG_HOME}/bash.d/${repo}
+}
+
+# Update a given single repository
+do-git-pull()
+{
+    # $1 is expected to be the name of a local git repository
+    local localrepo=$(localname "$1")
+    pushd ${localrepo}
+    git pull --rebase
+    popd >/dev/null
+}
+
+# Update all projects
+dot-update()
+{
+    dot-foreach-versioned-project do-git-pull
 }
 
 # Create the equivalent .profile
@@ -96,9 +129,7 @@ alias dot-clone=dot-install
 # dot-rm: rm the repo from local disk
 dot-rm()
 {
-    local repo="$1"
-    local XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
-    local local_repo=${XDG_CONFIG_HOME}/bash.d/${repo}
+    local local_repo=$(localname "$1")
     if [[ -d ${local_repo} ]]; then            
         rm -rf ${local_repo}
     fi
@@ -131,9 +162,8 @@ dot-unversioned()
 dot-status()
 {
     local versioned_projects=$(dot-versioned | tr '\n' ' ')
-    local XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
     for project in ${versioned_projects}; do
-        local local_repo=${XDG_CONFIG_HOME}/bash.d/${project}
+        local local_repo=$(localname ${project})
         pushd ${local_repo} >/dev/null
         repostatus
         popd >/dev/null
@@ -144,3 +174,4 @@ dot-status()
         echo -e "$blue$project: $red unversioned"    
     done
 }
+

@@ -36,7 +36,13 @@ repositories.  For example, ::
 dot provides a suite of commands to install, monitor and update the snippets.
 
 * dot-available: What dot-* are available on github?
+  Example: ``dot-available DrGeoff``, ``dot-available wolfwoolford``
+  If your github user is in .gitconfig then ``dot-available`` will 
+  show your own github repositories.  If you prefix your bashrc repositories with
+  ``dot-`` then dot-available will restrict itself to only showing ``dot-*``
+  repositories.
 * dot-install/dot-clone:  Do a git clone of a github dot-* repo
+  Example: ``dot-install https://github.com/DrGeoff/dot-jumpmarks``
 * dot-rm: Remove the repo from local disk
 * dot-versioned: Which of the configs are locally in version control?
 * dot-unversioned: Which of the configs are not in version control?

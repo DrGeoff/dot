@@ -185,5 +185,6 @@ dot-status()
     for project in ${unversioned_projects}; do
         echo -e "$blue$project: $red unversioned"    
     done
+    echo -ne "$none"
 }
 

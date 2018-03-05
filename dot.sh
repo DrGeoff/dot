@@ -78,10 +78,20 @@ dot-cat()
 # Figure out the github user name
 dot-github-user()
 {
-    # Assume $1 is the github user name, but if no $1 is passed in then try to find their name in .gitconfig
-    local gitconfig_nameline=$(grep name ${HOME}/.gitconfig |head -1)
-    local gitconfig_name=${gitconfig_nameline#*= }
-    echo ${1:-$gitconfig_name}
+    # If $1 exists then assume $1 is the github user name, but if no $1 is passed in then try to find their name in .gitconfig
+    local gitconfig_name=""
+    if [[ -s ${HOME}/.gitconfig ]]; then
+        local gitconfig_nameline=$(grep name ${HOME}/.gitconfig |head -1)
+        gitconfig_name=${gitconfig_nameline#*= }
+    fi
+    github_user=${1:-$gitconfig_name}
+
+    if [[ -z ${github_user} ]]; then
+        echo >&2 Could not determine the github user.  Either pass a valid github user name or put a "name=" into your .gitconfig.
+        exit 1
+    fi
+
+    echo ${github_user}
 }
 
 # What dot-* are available on github?

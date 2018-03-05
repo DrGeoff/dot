@@ -4,7 +4,7 @@
 dot-foreach-config()
 {
     local XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
-    local dotfiles=$(find $XDG_CONFIG_HOME/bash.d -type f \( ! -iwholename '*.git*' ! -name 'LICEN*' ! -name README  ! -name '*spec' \) )
+    local dotfiles=$(find $XDG_CONFIG_HOME/bash.d -type f \( ! -iwholename '*.git*' ! -name 'LICEN*' ! -name 'README*'  ! -name '*spec' \) )
     for dotfile in $dotfiles; do
         eval "$1" $dotfile
     done

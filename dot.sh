@@ -131,6 +131,7 @@ dot-install()
 
     # 
     local XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
+    mkdir -p $XDG_CONFIG_HOME/bash.d
     pushd $XDG_CONFIG_HOME/bash.d >/dev/null
     git clone ${repo} 
     popd >/dev/null

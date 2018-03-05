@@ -98,13 +98,14 @@ dot-github-user()
 dot-available()
 {
     local github_user=$(dot-github-user "$1")
-    local available=$(curl -s https://api.github.com/users/${github_user}/repos |jq '.[].name' |xargs |tr ' ' '\n' )
+    local available=$(curl -s https://api.github.com/users/${github_user}/repos)
+    local names=$(jq '.[] | {name,html_url}' <<<${available})
 
     # If there are repositories named dot-* then assume that they are the only ones we want to see
-    if [[ $(grep -c ^dot <<< ${available}) -gt 0 ]]; then
-        grep ^dot <<< $available
+    if [[ $(jq 'select(.name | startswith("dot"))' <<< ${names} |wc -l) -gt 0 ]]; then
+        jq 'select(.name | startswith("dot"))' <<< ${names}
     else
-        cat <<< ${available}
+        jq '.' <<< ${names}
     fi
 }
 

@@ -79,6 +79,8 @@ do-git-pull()
 dot-update()
 {
     dot-foreach-versioned-project do-git-pull
+    # re-source the configs because they may have changed
+    dot-foreach-config source
 }
 
 # With no parameters, create the equivalent .profile

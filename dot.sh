@@ -10,6 +10,18 @@ dot-foreach-config()
     done
 }
 
+# dot-* projects can have more than one config file.  This iterates over every config file in a given project.
+dot-foreach-config-in-project()
+{
+    local project="$1"
+    local cmd="$2"
+    local XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
+    local dotfiles=$(find $XDG_CONFIG_HOME/bash.d -type f \( -iwholename "*${project}*" ! -iwholename '*.git*' ! -name 'LICEN*' ! -name 'README*'  ! -name '*spec' \) )
+    for dotfile in $dotfiles; do
+        eval "$cmd" $dotfile
+    done
+}
+
 # A dot-* project may or may not be version controlled.  This iterates over every project name.
 dot-foreach-project()
 {
@@ -69,10 +81,15 @@ dot-update()
     dot-foreach-versioned-project do-git-pull
 }
 
-# Create the equivalent .profile
+# With no parameters, create the equivalent .profile
+# If $1 is a project name then only cat for that project
 dot-cat()
 {
-    dot-foreach-config echo-cat
+    if [[ -z "$1" ]]; then
+        dot-foreach-config echo-cat
+    else
+        dot-foreach-config-in-project "$1" echo-cat
+    fi
 }
 
 # Figure out the github user name

@@ -4,7 +4,9 @@
 dot-foreach-config()
 {
     local XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
-    local dotfiles=$(find $XDG_CONFIG_HOME/bash.d -type f \( ! -iwholename '*.git*' ! -name 'LICEN*' ! -name 'README*'  ! -name '*spec' \) )
+    # Busybox doesn't support iwholename otherwise we'd like to write
+    #local dotfiles=$(find $XDG_CONFIG_HOME/bash.d -type f \( ! -iwholename '*.git*' ! -name 'LICEN*' ! -name 'README*'  ! -name '*spec' \) )
+    local dotfiles=$(find $XDG_CONFIG_HOME/bash.d -type f |grep -v '.*/.git/.*'  |grep -v LICEN |grep -v README |grep -v '\.spec')
     for dotfile in $dotfiles; do
         eval "$1" $dotfile
     done
@@ -16,7 +18,9 @@ dot-foreach-config-in-project()
     local project="$1"
     local cmd="$2"
     local XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
-    local dotfiles=$(find $XDG_CONFIG_HOME/bash.d -type f \( -iwholename "*${project}*" ! -iwholename '*.git*' ! -name 'LICEN*' ! -name 'README*'  ! -name '*spec' \) )
+    # Busybox doesn't support iwholename otherwise we'd like to write
+    # local dotfiles=$(find $XDG_CONFIG_HOME/bash.d -type f \( -iwholename "*${project}*" ! -iwholename '*.git*' ! -name 'LICEN*' ! -name 'README*'  ! -name '*spec' \) )
+    local dotfiles=$(find $XDG_CONFIG_HOME/bash.d -type f | grep "${project}" | grep -v '.*/.git/.*' |grep -v LICEN |grep -v README |grep -v '\.spec')
     for dotfile in $dotfiles; do
         eval "$cmd" $dotfile
     done

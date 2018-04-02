@@ -51,7 +51,7 @@ dot provides a suite of commands to install, monitor and update the snippets.
 
 DEPENDENCIES
 ============
-bash jq
+bash jq curl
 
 INSTALLATION
 ============
